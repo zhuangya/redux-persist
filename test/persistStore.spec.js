@@ -45,6 +45,21 @@ describe('persistStore scenarios', function () {
       done()
     })
   })
+
+  it('works in promise mode', function (done) {
+    let seedState = {foo: 3, bar: 4}
+
+    let store = createMockStore({
+      mockState: {foo: 1, bar: 2},
+      dispatch: () => {}
+    })
+
+    persistStore(store, { storage: createMemoryStorage(seedState) })
+      .then((restoredState) => {
+        assert(isEqual(restoredState, seedState))
+        done()
+      })
+  })
 })
 
 describe('getStoredState', function () {

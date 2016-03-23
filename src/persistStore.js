@@ -26,6 +26,16 @@ export default function persistStore (store, config = {}, onComplete) {
   let purgeMode = false
   let storesToProcess = []
 
+  let persistor = {}
+  if (!onComplete && !!Promise) {
+    persistor = new Promise((resolve, reject) => {
+      onComplete = (err, state) => {
+        if (err) reject(err)
+        else resolve(state)
+      }
+    })
+  }
+
   // restore
   if (shouldRestore) {
     genericSetImmediate(() => {
@@ -102,12 +112,11 @@ export default function persistStore (store, config = {}, onComplete) {
     })
   }
 
-  // return `persistor`
-  return {
-    rehydrate: adhocRehydrate,
-    purge,
-    purgeAll
-  }
+  // decorate and return `persistor`, which may either be a plain object or promise
+  persistor.rehydrate = adhocRehydrate
+  persistor.purge = purge
+  persistor.purgeAll = purgeAll
+  return persistor
 }
 
 function warnIfRemoveError (key) {
